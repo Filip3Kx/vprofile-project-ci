@@ -22,7 +22,7 @@ pipeline {
     }
     stage("Prepare Artifact") {
       steps {
-        sh 'mv target/vprofile-v2.war target/vprofile-${BUILD_ID}.war'
+        sh 'mv target/vprofile-v2.war target/${BUILD_ID}vprofile_${BUILD_TIMESTAMP}.war'
       }
       post {
         success {
