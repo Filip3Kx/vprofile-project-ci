@@ -19,6 +19,7 @@ pipeline {
       steps {
         sh 'mvn test'
       }
+    }
     stage("Prepare Artifact") {
       steps {
         sh 'mv /target/vprofile-v2.war /target/vprofile-${BUILD_ID}.war'
