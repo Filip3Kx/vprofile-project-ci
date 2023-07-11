@@ -7,7 +7,7 @@ pipeline {
   stages {
     stage('Fetch Code') {
       steps { 
-        git branch: 'vprofile-jenkins', url: 'https://github.com/Filip3Kx/vprofile-project-practice'
+        git branch: 'vprofile-jenkins-ci', url: 'https://github.com/Filip3Kx/vprofile-project-practice'
       }
     }
     stage('Build') {
