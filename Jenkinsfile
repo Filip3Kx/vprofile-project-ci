@@ -43,6 +43,13 @@ pipeline {
             }
         }
     }
+    stage("Quality gate"){
+        steps{
+            timeout(time: 1, unit: 'HOURS') {
+                waitForQualityGate abortPipeline: true
+            }
+        }
+    }
     stage("Prepare Artifact") {
       steps {
         sh 'mv target/vprofile-v2.war target/${BUILD_ID}vprofile_${BUILD_TIMESTAMP}.war'
