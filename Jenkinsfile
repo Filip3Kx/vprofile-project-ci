@@ -50,33 +50,29 @@ pipeline {
             }
         }
     }
-    stage("Prepare Artifact") {
+    stage("Upload artifact to nexus") {
       steps {
-        sh 'mv target/vprofile-v2.war target/${BUILD_ID}vprofile_${BUILD_TIMESTAMP}.war'
+        nexusArtifactUploader(
+          nexusVersion: 'nexus3',
+          protocol: 'http',
+          nexusUrl: '192.168.1.20:8081',
+          groupId: 'QA',
+          version: "${env.BUILD_ID}",
+          repository: 'vprofile-artifacts',
+          credentialsId: 'nexus',
+          artifacts: [
+            [artifactId: 'vprofile-pipeline',
+            classifier: '',
+            file: 'target/vprofile-v2.war',
+            type: 'war']
+          ]
+        )
       }
       post {
         success {
             echo 'Archiving artifacts...'
             archiveArtifacts artifacts: '**/*.war'
         }
-      }
-    }
-    stage("Upload artifact to nexus"){
-      steps {
-        nexusArtifactUploader(
-          nexusVersion: 'nexus3',
-          protocol: 'http',
-          nexusUrl: '192.168.1.20:8081',
-          version: 1.0,
-          repository: 'vprofile-artifacts',
-          credentialsId: '317b7162-2445-3780-8b2c-197a9ee950ca'
-          artifacts: [
-            [artifactId: 'vprofile-pipeline'
-            classifier: ''
-            file: 'target/${BUILD_ID}vprofile_${BUILD_TIMESTAMP}.war'
-            type: 'war']
-          ]
-        )
       }
     }
   }
