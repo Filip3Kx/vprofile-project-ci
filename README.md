@@ -12,7 +12,13 @@ This project focuses on automating the setup of your local stack. Exrecise from 
 - Post step is to notify users whether the build was succesful or not
 
 ## Deployment
-Deployment of the entire stack is done via Docker Compose
+Deployment of the entire stack is done via Docker Compose.
+
+After the CI pipeline the docker image with an app artifact is uploaded to Nexus. [docker-compose.yml]() uses this file so setting up the stack is as simple as running
+```
+docker compose up
+```
+![image](https://github.com/Filip3Kx/vprofile-project-ci/assets/114138650/6907c030-2fc7-4c98-816a-92e8c588217e)
 
 ## App Services
 - Nginx - load balancer
