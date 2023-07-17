@@ -1,3 +1,7 @@
+def COLOR_MAP = [
+    'SUCCES': 'good',
+    'FAILURE': 'danger',
+]
 pipeline {
   agent any 
   tools {
@@ -68,12 +72,14 @@ pipeline {
           ]
         )
       }
-      post {
-        success {
-            echo 'Archiving artifacts...'
-            archiveArtifacts artifacts: '**/*.war'
-        }
-      }
+    }
+  }
+  post {
+    always {
+      echo 'Slack Notification'
+      slackSend channel: '#jenkins-notifications',
+        color: COLOR_MAP[currentBuild.currentResult],
+        message: "*${currentBuild.currentResult}:* Job ${env.JOB_NAME} build ${env.BUILD_NUMBER} \n More info at: ${env.BUILD_URL}"
     }
   }
 }
