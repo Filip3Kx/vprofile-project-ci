@@ -11,7 +11,7 @@ pipeline {
   stages {
     stage('Fetch Code') {
       steps { 
-        git branch: 'vprofile-jenkins-ci', url: 'https://github.com/Filip3Kx/vprofile-project-ci'
+        git branch: 'main', url: 'https://github.com/Filip3Kx/vprofile-project-ci'
       }
     }
     stage('Build') {
@@ -54,23 +54,24 @@ pipeline {
             }
         }
     }
-    stage("Upload artifact to nexus") {
+    stage("Docker cleanup") {
       steps {
-        nexusArtifactUploader(
-          nexusVersion: 'nexus3',
-          protocol: 'http',
-          nexusUrl: '192.168.1.20:8081',
-          groupId: 'QA',
-          version: "${env.BUILD_ID}",
-          repository: 'vprofile-artifacts',
-          credentialsId: 'nexus',
-          artifacts: [
-            [artifactId: 'vprofile-pipeline',
-            classifier: '',
-            file: 'target/vprofile-v2.war',
-            type: 'war']
-          ]
-        )
+        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+          sh 'docker rm -vf $(docker ps -aq)'
+          sh 'docker rmi -f $(docker images -aq)'
+        }
+      }
+    }
+    stage("Build & Publish docker image") {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'nexus', passwordVariable: 'NEXUS_PASSWORD', usernameVariable: 'NEXUS_USERNAME')]) {
+          sh "docker login -u $NEXUS_USERNAME -p $NEXUS_PASSWORD 192.168.1.20:8082"
+        }
+        sh 'docker build -t vprofileapp .'
+        sh "docker tag vprofileapp 192.168.1.20:8082/vprofile:${env.BUILD_ID}"
+        sh "docker push 192.168.1.20:8082/vprofile:${env.BUILD_ID}"
+        sh "docker tag vprofileapp 192.168.1.20:8082/vprofile:latest"
+        sh "docker push 192.168.1.20:8082/vprofile:latest"
       }
     }
   }
