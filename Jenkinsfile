@@ -3,7 +3,15 @@ def COLOR_MAP = [
     'FAILURE': 'danger',
 ]
 pipeline {
-  agent any 
+  environment {
+    git_repo = 'https://github.com/Filip3Kx/vprofile-project-ci'
+    git_branch = 'main'
+    sonar_server = 'sonar_server'
+    docker_registry = "192.168.1.20:8082"
+    docker_reg_latest = "192.168.1.20:8082/vprofile:latest"
+    docker_reg_build_id = "192.168.1.20:8082/vprofile:${env.BUILD_ID}"
+  }
+  agent any
   tools {
     maven "maven"
     jdk "jdk11"
@@ -11,7 +19,7 @@ pipeline {
   stages {
     stage('Fetch Code') {
       steps { 
-        git branch: 'main', url: 'https://github.com/Filip3Kx/vprofile-project-ci'
+        git branch: "${git_branch}", url: "${git_repo}"
       }
     }
     stage('Build') {
@@ -34,7 +42,7 @@ pipeline {
             scannerHome = tool 'sonar4.8'
         }
         steps {
-            withSonarQubeEnv('sonar_server') {
+            withSonarQubeEnv("${sonar_server}") {
                 sh '''${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=vprofile \
                 -Dsonar.projectName=vprofile \
                 -Dsonar.projectVersion=1.0 \
@@ -65,13 +73,13 @@ pipeline {
     stage("Build & Publish docker image") {
       steps {
         withCredentials([usernamePassword(credentialsId: 'nexus', passwordVariable: 'NEXUS_PASSWORD', usernameVariable: 'NEXUS_USERNAME')]) {
-          sh "docker login -u $NEXUS_USERNAME -p $NEXUS_PASSWORD 192.168.1.20:8082"
+          sh "docker login -u $NEXUS_USERNAME -p $NEXUS_PASSWORD ${docker_registry}"
         }
         sh 'docker build -t vprofileapp .'
-        sh "docker tag vprofileapp 192.168.1.20:8082/vprofile:${env.BUILD_ID}"
-        sh "docker push 192.168.1.20:8082/vprofile:${env.BUILD_ID}"
-        sh "docker tag vprofileapp 192.168.1.20:8082/vprofile:latest"
-        sh "docker push 192.168.1.20:8082/vprofile:latest"
+        sh "docker tag vprofileapp ${docker_reg_build_id}"
+        sh "docker push ${docker_reg_build_id}"
+        sh "docker tag vprofileapp ${docker_reg_latest}"
+        sh "docker push ${docker_reg_latest}"
       }
     }
   }
