@@ -2,7 +2,8 @@ This project focuses on automating the setup of your local stack. Exrecise from 
 
 ## Pipeline
 
-![image](https://github.com/Filip3Kx/vprofile-project-ci/assets/114138650/912f328b-9ba9-491f-a208-4ac89f6ef1b0)
+![image](https://github.com/Filip3Kx/vprofile-project-ci/assets/114138650/d420c221-dfef-4ac4-9d19-274521a16aa0)
+
 
 - After jenkins finds a code change in GitHub repository a pipeline starts
 - It builds the app with maven
